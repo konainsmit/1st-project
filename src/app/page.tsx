@@ -1,65 +1,102 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Activity, AlertTriangle, ArrowUpRight, Bell, CalendarDays, Check,
+  ChevronDown, Clock3, FileText, HeartPulse, Info, Menu, Mic, MoreHorizontal,
+  Phone, Plus, Send, ShieldCheck, Sparkles, Stethoscope, UserRound, X,
+} from "lucide-react";
+
+type Level = "mild" | "urgent" | "critical";
+type Message = { from: "agent" | "patient" | "system"; text: string; time: string };
+
+const scenarios: Record<Level, { label: string; title: string; risk: string; score: number; specialty: string; color: string; messages: Message[] }> = {
+  critical: {
+    label: "Simulate Critical Stroke", title: "Critical emergency", risk: "Immediate intervention required", score: 98, specialty: "Emergency medicine", color: "critical",
+    messages: [
+      { from: "patient", text: "The left side of my face feels numb and my speech is slurred.", time: "10:42 AM" },
+      { from: "agent", text: "I am detecting time-sensitive symptoms. Are you experiencing weakness in one arm, severe headache, or trouble walking?", time: "10:42 AM" },
+      { from: "patient", text: "My left arm is weak. It started about 20 minutes ago.", time: "10:43 AM" },
+      { from: "system", text: "Emergency protocol activated. Dispatch confirmation requested.", time: "10:43 AM" },
+    ],
+  },
+  urgent: {
+    label: "Simulate Urgent Appendicitis", title: "Urgent assessment", risk: "Same-day clinician review", score: 76, specialty: "General surgery", color: "urgent",
+    messages: [
+      { from: "patient", text: "Sharp pain started around my belly button and moved to the lower right side.", time: "10:42 AM" },
+      { from: "agent", text: "Thank you. On a scale of 1 to 10, how severe is the pain, and do you have a fever or nausea?", time: "10:42 AM" },
+      { from: "patient", text: "It is an 8. I feel nauseous and have a fever of 38.4 C.", time: "10:43 AM" },
+      { from: "system", text: "Same-day review requested. Searching for an available clinician.", time: "10:43 AM" },
+    ],
+  },
+  mild: {
+    label: "Simulate Mild Seasonal Flu", title: "Mild symptoms", risk: "Self-care guidance appropriate", score: 24, specialty: "Primary care", color: "mild",
+    messages: [
+      { from: "patient", text: "I have a runny nose, sore throat, and mild fatigue since yesterday.", time: "10:42 AM" },
+      { from: "agent", text: "I can help with that. Do you have a high fever, breathing difficulty, or any ongoing medical conditions?", time: "10:42 AM" },
+      { from: "patient", text: "No high fever or breathing problems. I am otherwise healthy.", time: "10:43 AM" },
+      { from: "system", text: "Low-risk pattern identified. Self-care plan and routine follow-up available.", time: "10:43 AM" },
+    ],
+  },
+};
+
+const slots = ["Today, 2:30 PM", "Today, 4:00 PM", "Tomorrow, 9:15 AM"];
+
+function Metric({ icon, label, value, detail, accent }: { icon: React.ReactNode; label: string; value: string; detail: string; accent: string }) {
+  return <div className="flex items-center gap-3 border-b border-slate-100 p-4 last:border-0 md:border-b-0 md:border-r md:last:border-0"><div className={`grid h-9 w-9 place-items-center rounded-lg ${accent === "emerald" ? "bg-emerald-50 text-emerald-600" : accent === "amber" ? "bg-amber-50 text-amber-600" : "bg-cyan-50 text-cyan-600"}`}>{icon}</div><div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p><div className="mt-0.5 flex items-baseline gap-2"><span className="text-lg font-bold tracking-tight text-slate-900">{value}</span><span className="text-[10px] font-medium text-slate-400">{detail}</span></div></div></div>;
+}
 
 export default function Home() {
+  const [level, setLevel] = useState<Level>("urgent");
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState(scenarios.urgent.messages);
+  const [observability, setObservability] = useState(false);
+  const [booked, setBooked] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const scenario = scenarios[level];
+
+  function simulate(next: Level) {
+    setLevel(next); setMessages(scenarios[next].messages); setBooked(false);
+  }
+  function sendMessage() {
+    if (!input.trim()) return;
+    setMessages((current) => [...current, { from: "patient", text: input.trim(), time: "10:44 AM" }, { from: "agent", text: "I have captured that. I am updating the risk profile and will ask the next most relevant question.", time: "10:44 AM" }]);
+    setInput("");
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-[#f4f8fb] text-slate-900">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-[1500px] items-center justify-between px-5 lg:px-8">
+          <div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-cyan-300 shadow-lg shadow-slate-900/10"><HeartPulse size={19} strokeWidth={2.5} /></div><div><div className="text-[15px] font-bold tracking-tight">care<span className="text-cyan-600">flow</span></div><div className="text-[9px] font-semibold uppercase tracking-[.2em] text-slate-400">clinical intelligence</div></div></div>
+          <nav className="hidden items-center gap-7 text-[12px] font-semibold text-slate-500 md:flex"><a className="text-slate-900" href="#intake">Intake workspace</a><a href="#activity">Live activity</a><a href="#protocol">Protocols</a></nav>
+          <div className="flex items-center gap-2"><div className="hidden items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 sm:flex"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" /> Demo simulation mode</div><button aria-label="Notifications" className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500"><Bell size={16} /></button><button aria-label="Open menu" onClick={() => setMobileMenu(!mobileMenu)} className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 md:hidden"><Menu size={16} /></button><div className="hidden h-9 w-9 place-items-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 sm:grid">JS</div></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        {mobileMenu && <div className="border-t border-slate-100 bg-white px-5 py-3 text-sm font-semibold text-slate-600 md:hidden"><a className="mr-5" href="#intake">Intake workspace</a><a href="#activity">Live activity</a></div>}
+      </header>
+
+      <div className="mx-auto max-w-[1500px] px-5 pb-10 pt-7 lg:px-8">
+        <section className="mb-6 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="mb-2 text-[11px] font-bold uppercase tracking-[.2em] text-cyan-600">Monday, 24 June 2024 / Command center</p><h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-[30px]">Good morning, Dr. Shah <span className="text-slate-300">—</span> <span className="font-normal text-slate-500">your care queue is clear.</span></h1></div><div className="flex items-center gap-2 text-[11px] text-slate-500"><span className="flex items-center gap-1.5 font-semibold text-emerald-600"><span className="h-2 w-2 rounded-full bg-emerald-500" /> All systems operational</span><span className="text-slate-300">|</span> Last sync 10:44:12 AM</div></section>
+
+        <section className="mb-6 grid grid-cols-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:grid-cols-3">
+          <Metric icon={<Clock3 />} label="Est. ER hours saved" value="184.6" detail="this month" accent="cyan" /><Metric icon={<ShieldCheck />} label="Triage accuracy rate" value="99.4%" detail="+1.2% vs last month" accent="emerald" /><Metric icon={<Activity />} label="Average wait time" value="−68%" detail="vs. baseline" accent="amber" />
+        </section>
+
+        <section className="mb-6 rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white shadow-xl shadow-slate-900/10"><div className="flex flex-col gap-3 lg:flex-row lg:items-center"><div className="mr-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.14em] text-slate-300"><Sparkles size={15} className="text-cyan-300" /> Run a simulation</div><div className="flex flex-1 flex-wrap gap-2">{(Object.keys(scenarios) as Level[]).map((key) => <button key={key} onClick={() => simulate(key)} className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${level === key ? "border-white/30 bg-white text-slate-900" : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"}`}>{scenarios[key].label}</button>)}</div><span className="text-[10px] text-slate-500">Synthetic patient data · Safe sandbox</span></div></section>
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.38fr)_minmax(390px,.62fr)]">
+          <section id="intake" className="flex min-h-[635px] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center justify-between border-b border-slate-100 px-6 py-4"><div className="flex items-center gap-3"><div className="relative grid h-10 w-10 place-items-center rounded-xl bg-cyan-50 text-cyan-600"><Stethoscope size={20} /><span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" /></div><div><h2 className="text-sm font-bold">Adaptive clinical intake</h2><p className="text-[11px] text-slate-400">Session <span className="font-mono text-slate-500">CF-240624-0081</span> · Anonymous patient</p></div></div><button onClick={() => setObservability(true)} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50"><Activity size={14} className="text-cyan-600" /> Agent observability</button></div>
+            <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 px-6 py-3"><div className="flex gap-1"><span className="h-1.5 w-5 rounded-full bg-cyan-500" /><span className="h-1.5 w-5 rounded-full bg-cyan-500" /><span className="h-1.5 w-5 rounded-full bg-slate-200" /><span className="h-1.5 w-5 rounded-full bg-slate-200" /></div><span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assessment progress</span><span className="ml-auto text-[10px] font-semibold text-slate-500">Step 2 of 4</span></div>
+            <div className="flex-1 space-y-4 overflow-auto p-6">{messages.map((message, index) => <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} key={`${message.time}-${index}`} className={`flex gap-3 ${message.from === "patient" ? "justify-end" : ""}`}>{message.from === "agent" && <div className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-cyan-50 text-cyan-600"><Sparkles size={14} /></div>}{message.from === "system" && <div className={`mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg ${level === "critical" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}><AlertTriangle size={14} /></div>}<div className={`max-w-[75%] ${message.from === "patient" ? "items-end" : ""}`}><div className={`rounded-2xl px-4 py-3 text-[13px] leading-5 ${message.from === "patient" ? "rounded-br-sm bg-slate-900 text-white" : message.from === "system" ? "border border-amber-200 bg-amber-50 font-medium text-amber-900" : "rounded-tl-sm border border-slate-200 bg-white text-slate-700 shadow-sm"}`}>{message.text}</div><div className={`mt-1.5 text-[10px] text-slate-400 ${message.from === "patient" ? "text-right" : ""}`}>{message.from === "agent" ? "Careflow agent" : message.from === "system" ? "System event" : "You"} · {message.time}</div></div>{message.from === "patient" && <div className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><UserRound size={14} /></div>}</motion.div>)}<div className="flex items-center gap-3 rounded-xl border border-cyan-100 bg-cyan-50/50 px-4 py-3 text-[11px] text-slate-500"><div className="flex gap-1"><span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500 [animation-delay:-.2s]" /><span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500 [animation-delay:-.1s]" /><span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500" /></div><span><b className="text-cyan-700">Thinking:</b> Evaluating symptom cluster <span className="text-slate-300">→</span> Calculating risk score <span className="text-slate-300">→</span> Formulating dynamic follow-up</span></div></div>
+            <div className="border-t border-slate-100 p-4"><div className="flex items-end gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100"><textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Describe how you are feeling..." rows={1} className="min-h-9 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-400" /><button aria-label="Voice input" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-white"><Mic size={16} /></button><button aria-label="Send message" onClick={sendMessage} className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-600 text-white shadow-sm hover:bg-cyan-700"><Send size={15} /></button></div><p className="mt-2 text-center text-[10px] text-slate-400">Careflow is a decision-support tool, not a diagnosis. In an emergency, call local services.</p></div>
+          </section>
+
+          <aside className="space-y-6"><section className={`overflow-hidden rounded-2xl border bg-white shadow-sm ${level === "critical" ? "border-red-300 shadow-red-100" : "border-slate-200"}`}><div className={`px-5 py-4 ${level === "critical" ? "bg-red-600 text-white" : "bg-slate-900 text-white"}`}><div className="flex items-center justify-between"><span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] text-white/70"><span className={`h-2 w-2 rounded-full ${level === "critical" ? "animate-pulse bg-white" : "bg-emerald-400"}`} /> Live triage determination</span><MoreHorizontal size={17} className="text-white/60" /></div><div className="mt-4 flex items-end justify-between"><div><h2 className="text-xl font-bold">{scenario.title}</h2><p className="mt-1 text-xs text-white/65">{scenario.risk}</p></div><div className="text-right"><div className="text-3xl font-bold tracking-tight">{scenario.score}<span className="text-sm font-normal text-white/50">/100</span></div><div className="text-[9px] uppercase tracking-wider text-white/60">risk score</div></div></div></div><div className="p-5"><div className="mb-5 flex h-2 overflow-hidden rounded-full bg-slate-100"><span className="w-1/3 bg-emerald-400" /><span className="w-1/3 bg-amber-400" /><span className="flex-1 bg-red-500" style={{ opacity: level === "critical" ? 1 : .18 }} /></div><div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold uppercase tracking-wider"><span className="text-emerald-600">Mild</span><span className="text-amber-600">Urgent</span><span className="text-red-600">Critical</span></div><div className="mt-5 flex items-start gap-3 rounded-xl bg-slate-50 p-3"><Info size={16} className="mt-0.5 shrink-0 text-cyan-600" /><p className="text-[11px] leading-4 text-slate-600">Pattern confidence <b className="text-slate-900">{level === "critical" ? "98.1%" : level === "urgent" ? "91.7%" : "94.2%"}</b>. Determination is based on reported symptoms and requires clinician verification.</p></div>{level === "critical" ? <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"><div className="flex gap-3"><Phone size={17} className="text-red-600" /><div><p className="text-xs font-bold text-red-900">Emergency protocol active</p><p className="mt-1 text-[11px] leading-4 text-red-700">Call <b>911</b> or <b>1122</b> now. Dispatch confirmation is being initiated.</p></div></div><button className="mt-3 w-full rounded-lg bg-red-600 py-2.5 text-xs font-bold text-white hover:bg-red-700">Confirm dispatch request</button></div> : <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 p-3"><div className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-50 text-cyan-600"><Stethoscope size={17} /></div><div className="flex-1"><p className="text-[11px] font-bold text-slate-900">Recommended pathway</p><p className="text-[11px] text-slate-500">{scenario.specialty} · {level === "urgent" ? "same-day review" : "routine follow-up"}</p></div><ArrowUpRight size={15} className="text-slate-400" /></div>}</div></section>
+          <section id="activity" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-4 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Autonomous care coordination</p><h3 className="mt-1 text-sm font-bold">Booking drawer</h3></div><CalendarDays size={18} className="text-cyan-600" /></div><div className="mb-4 flex items-center justify-between rounded-xl bg-slate-50 p-3"><div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700">NP</div><div><p className="text-xs font-bold">Next available clinician</p><p className="text-[11px] text-slate-500">Dr. Nadia Patel · {scenario.specialty}</p></div></div><span className="h-2 w-2 rounded-full bg-emerald-500" /></div><p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Select a preferred slot</p><div className="space-y-2">{slots.map((slot, index) => <button key={slot} onClick={() => setBooked(true)} className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-left text-xs font-semibold transition ${booked && index === 0 ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-slate-200 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50/40"}`}><span className="flex items-center gap-2"><Clock3 size={14} className="text-slate-400" /> {slot}</span>{booked && index === 0 ? <Check size={15} /> : <span className="text-[10px] text-emerald-600">Available</span>}</button>)}</div>{booked && <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="mt-3 flex items-center gap-2 text-[11px] font-semibold text-emerald-600"><Check size={14} /> Appointment locked · Confirmation sent</motion.div>}<button className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 py-3 text-xs font-bold text-white shadow-sm shadow-cyan-600/20 hover:bg-cyan-700"><FileText size={14} /> {level === "mild" ? "Generate self-care plan" : "View care coordination"}</button></section></aside>
         </div>
-      </main>
-    </div>
+      </div>
+      <AnimatePresence>{observability && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex justify-end bg-slate-950/25 backdrop-blur-sm" onClick={() => setObservability(false)}><motion.div initial={{ x: 420 }} animate={{ x: 0 }} exit={{ x: 420 }} onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-md overflow-auto bg-slate-950 p-6 text-slate-100 shadow-2xl"><div className="mb-8 flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-cyan-300">Developer console</p><h2 className="mt-1 text-lg font-bold">Agent observability</h2></div><button onClick={() => setObservability(false)} className="text-slate-400 hover:text-white"><X size={19} /></button></div><div className="grid grid-cols-2 gap-3">{[["Model latency", "842 ms"], ["Token usage", "1,284"], ["Confidence", `${scenario.score === 98 ? "98.1" : "91.7"}%`], ["Policy checks", "12 / 12"]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-[10px] text-slate-400">{label}</p><p className="mt-2 text-lg font-bold text-cyan-200">{value}</p></div>)}</div><div className="mt-6"><p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Raw triage payload</p><pre className="overflow-auto rounded-xl border border-white/10 bg-black/30 p-4 text-[11px] leading-5 text-emerald-300">{JSON.stringify({ session_id: "CF-240624-0081", triage_level: level, risk_score: scenario.score, confidence: level === "critical" ? .981 : .917, next_action: level === "critical" ? "dispatch_emergency" : "book_clinician", pii_redacted: true }, null, 2)}</pre></div><div className="mt-6 space-y-3 text-xs text-slate-300"><p className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> System prompt safety boundary passed</p><p className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> PII redaction layer passed</p><p className="flex items-center gap-2"><Check size={14} className="text-emerald-400" /> Deterministic triage schema validated</p></div></motion.div></motion.div>}</AnimatePresence>
+    </main>
   );
 }

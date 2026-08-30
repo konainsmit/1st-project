@@ -66,8 +66,8 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f4f8fb] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
+    <main className="clinical-shell min-h-screen bg-[#f4f8fb] text-slate-900">
+      <header className="glass-header sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[68px] max-w-[1500px] items-center justify-between px-5 lg:px-8">
           <div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-cyan-300 shadow-lg shadow-slate-900/10"><HeartPulse size={19} strokeWidth={2.5} /></div><div><div className="text-[15px] font-bold tracking-tight">care<span className="text-cyan-600">flow</span></div><div className="text-[9px] font-semibold uppercase tracking-[.2em] text-slate-400">clinical intelligence</div></div></div>
           <nav className="hidden items-center gap-7 text-[12px] font-semibold text-slate-500 md:flex"><a className="text-slate-900" href="#intake">Intake workspace</a><a href="#activity">Live activity</a><a href="#protocol">Protocols</a></nav>
@@ -79,7 +79,7 @@ export default function Home() {
       <div className="mx-auto max-w-[1500px] px-5 pb-10 pt-7 lg:px-8">
         <section className="mb-6 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="mb-2 text-[11px] font-bold uppercase tracking-[.2em] text-cyan-600">Monday, 24 June 2024 / Command center</p><h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-[30px]">Good morning, Dr. Shah <span className="text-slate-300">—</span> <span className="font-normal text-slate-500">your care queue is clear.</span></h1></div><div className="flex items-center gap-2 text-[11px] text-slate-500"><span className="flex items-center gap-1.5 font-semibold text-emerald-600"><span className="h-2 w-2 rounded-full bg-emerald-500" /> All systems operational</span><span className="text-slate-300">|</span> Last sync 10:44:12 AM</div></section>
 
-        <section className="mb-6 grid grid-cols-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:grid-cols-3">
+        <section className="metric-strip mb-6 grid grid-cols-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:grid-cols-3">
           <Metric icon={<Clock3 />} label="Est. ER hours saved" value="184.6" detail="this month" accent="cyan" /><Metric icon={<ShieldCheck />} label="Triage accuracy rate" value="99.4%" detail="+1.2% vs last month" accent="emerald" /><Metric icon={<Activity />} label="Average wait time" value="−68%" detail="vs. baseline" accent="amber" />
         </section>
 

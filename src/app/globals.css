@@ -5,7 +5,23 @@
 @theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --font-sans: var(--font-geist-sans); }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-geist-sans), sans-serif; }
+body { margin: 0; background: #f4f8fb; color: var(--foreground); font-family: var(--font-geist-sans), sans-serif; }
 button, a, textarea { transition: all .18s ease; }
 button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px solid #67e8f9; outline-offset: 2px; }
 nextjs-portal { display: none !important; }
+
+.clinical-shell { position: relative; overflow: hidden; background: radial-gradient(circle at 78% 5%, rgba(165,243,252,.3), transparent 24rem), radial-gradient(circle at 4% 45%, rgba(186,230,253,.24), transparent 26rem), #f4f8fb !important; }
+.clinical-shell::before { content: ""; position: absolute; inset: 68px 0 0; pointer-events: none; opacity: .32; background-image: linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,.035) 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(to bottom, black, transparent 70%); }
+.clinical-shell > * { position: relative; }
+.glass-header { background: rgba(255,255,255,.72) !important; border-color: rgba(148,163,184,.28) !important; box-shadow: 0 1px 18px rgba(15,23,42,.04); }
+.clinical-shell h1 { letter-spacing: -.045em; }
+.metric-strip { border-color: rgba(148,163,184,.28) !important; background: rgba(255,255,255,.82) !important; box-shadow: 0 18px 45px rgba(15,23,42,.06) !important; }
+.metric-strip > div { position: relative; min-height: 82px; }
+.metric-strip > div::after { content: ""; position: absolute; right: 18px; bottom: 14px; width: 54px; height: 20px; opacity: .55; background: linear-gradient(135deg, transparent 40%, #67e8f9 41% 44%, transparent 45% 54%, #0284c7 55% 58%, transparent 59%); }
+.clinical-shell > div > section:nth-child(3) { background: linear-gradient(110deg, #0b1328, #102744 62%, #0d5566) !important; border-color: rgba(103,232,249,.24) !important; box-shadow: 0 16px 42px rgba(8,47,73,.18) !important; }
+.clinical-shell > div > section:nth-child(3)::after { content: ""; float: right; width: 140px; height: 140px; margin-top: -45px; margin-right: -30px; border: 1px solid rgba(103,232,249,.15); border-radius: 50%; box-shadow: 0 0 0 16px rgba(103,232,249,.04), 0 0 0 32px rgba(103,232,249,.025); }
+.panel { border-color: rgba(148,163,184,.3) !important; box-shadow: 0 18px 50px rgba(15,23,42,.065) !important; }
+.intake-panel { background: rgba(255,255,255,.9) !important; }
+.triage-panel > div:first-child { background: linear-gradient(145deg, #111827 0%, #102c4a 58%, #075985 100%) !important; }
+.triage-panel { box-shadow: 0 18px 50px rgba(8,47,73,.1) !important; }
+@media (max-width: 640px) { .clinical-shell::before { background-size: 28px 28px; } .clinical-shell > div > section:nth-child(3)::after { display: none; } }
